@@ -3,8 +3,8 @@
 # Build the Rust project
 cargo build --release
 
-# Run the application with the specified directory in the background
-./target/release/serveit "$1" &
+# Run the application in the background and save the PID
+./target/release/serveit "$1" & echo $! > serveit.pid
 
 # Wait for the server to start
 sleep 2

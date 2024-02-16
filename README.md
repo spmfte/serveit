@@ -1,6 +1,10 @@
 <h1 align="center">ServeIt: Rust File Server</h1>
 <h3 align="center">Effortlessly serve files from the command line with Rust</h3>
 
+<div align="center">
+  <img src="./serveit-demo.gif" alt="ServeIt in action" width="600">
+</div>
+
 <p align="center">🚀 <strong>ServeIt</strong> leverages Rust's performance and Warp's elegance to create a robust file server that's both easy to use and incredibly efficient.</p>
 <p align="center">🌱 Designed for simplicity, it allows you to serve any directory as a static file server with just a single command.</p>
 

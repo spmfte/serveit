@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Navigate to the project directory
+cd /Users/aidan/projects/serveit || exit
 
 # Build the Rust project
 cargo build --release
@@ -12,5 +14,3 @@ sleep 2
 # Open the base URL in the default browser
 open "http://127.0.0.1:3030/files/"
 
-# Bring the Rust application back to the foreground (optional)
-fg

@@ -10,7 +10,7 @@ cargo build --release
 sleep 2
 
 # Open the base URL in the default browser
-open "http://127.0.0.1:5001/files/"
+open "http://127.0.0.1:3030/files/"
 
 # Bring the Rust application back to the foreground (optional)
 fg

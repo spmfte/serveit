@@ -35,7 +35,7 @@ async fn main() {
     let serve_dir = warp::path("files").and(warp::fs::dir(base_path.clone()));
     let routes = serve_dir;
 
-    println!("Listening on http://127.0.0.1:{}", port);
-    warp::serve(routes).run(([127, 0, 0, 1], port)).await;
+    println!("Listening on http://0.0.0.0:{}", port);
+    warp::serve(routes).run(([0, 0, 0, 0], port)).await;
 }
 

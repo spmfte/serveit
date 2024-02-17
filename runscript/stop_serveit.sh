@@ -28,3 +28,4 @@ else
     echo "PID file does not exist or is empty. Server might not be running."
 fi
 
+killall serveit

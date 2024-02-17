@@ -18,7 +18,7 @@ Icon
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
-.pid
+serveit.pid
 # Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop
@@ -26,3 +26,4 @@ Network Trash Folder
 Temporary Items
 .apdisk
 /target
+/webui

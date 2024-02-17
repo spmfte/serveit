@@ -1,28 +1,6 @@
 use clap::{App, Arg};
-use std::{path::PathBuf};
-use warp::{Filter, http::Response, reject, Rejection, Reply};
-
-// Define a custom error type to handle non-HTTP errors
-#[derive(Debug)]
-struct InternalError(String);
-impl warp::reject::Reject for InternalError {}
-
-async fn list_directory(base_path: PathBuf) -> Result<impl Reply, Rejection> {
-    let mut entries = Vec::new();
-    let read_dir = match std::fs::read_dir(&base_path) {
-        Ok(dir) => dir,
-        Err(e) => return Err(reject::custom(InternalError(e.to_string()))),
-    };
-    for entry in read_dir.filter_map(Result::ok) {
-        let path = entry.path();
-        if let Some(filename) = path.file_name().and_then(|n| n.to_str()) {
-            let url_encoded_path = urlencoding::encode(filename);
-            entries.push(format!("<li><a href='/files/{}'>{}</a></li>", url_encoded_path, filename));
-        }
-    }
-    let body = format!("<html><body><ul>{}</ul></body></html>", entries.join(""));
-    Ok(Response::builder().body(body).unwrap())
-}
+use std::path::PathBuf;
+use warp::Filter;
 
 #[tokio::main]
 async fn main() {
@@ -47,12 +25,17 @@ async fn main() {
     let base_path = PathBuf::from(directory);
     println!("Serving files from: {:?}", base_path);
 
+    // Ensure the base_path is absolute and resolve any potential symlink
+    let base_path = if base_path.is_relative() {
+        std::env::current_dir().unwrap().join(base_path)
+    } else {
+        base_path.canonicalize().unwrap()
+    };
+
     let serve_dir = warp::path("files").and(warp::fs::dir(base_path.clone()));
+    let routes = serve_dir;
 
-    let list_dir_path = base_path.clone();
-    let list_dir = warp::path("list").and_then(move || list_directory(list_dir_path.clone()));
-
-    let routes = serve_dir.or(list_dir);
-
-    warp::serve(routes).run(([0, 0, 0, 0], port)).await;
+    println!("Listening on http://127.0.0.1:{}", port);
+    warp::serve(routes).run(([127, 0, 0, 1], port)).await;
 }
+

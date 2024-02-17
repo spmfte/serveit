@@ -1,19 +1,39 @@
 use clap::{App, Arg};
-use std::path::PathBuf;
-use warp::Filter;
-use warp::http::Response;
+use std::{path::PathBuf};
+use warp::{Filter, http::Response, reject, Rejection, Reply};
+
+// Define a custom error type to handle non-HTTP errors
+#[derive(Debug)]
+struct InternalError(String);
+impl warp::reject::Reject for InternalError {}
+
+async fn list_directory(base_path: PathBuf) -> Result<impl Reply, Rejection> {
+    let mut entries = Vec::new();
+    let read_dir = match std::fs::read_dir(&base_path) {
+        Ok(dir) => dir,
+        Err(e) => return Err(reject::custom(InternalError(e.to_string()))),
+    };
+    for entry in read_dir.filter_map(Result::ok) {
+        let path = entry.path();
+        if let Some(filename) = path.file_name().and_then(|n| n.to_str()) {
+            let url_encoded_path = urlencoding::encode(filename);
+            entries.push(format!("<li><a href='/files/{}'>{}</a></li>", url_encoded_path, filename));
+        }
+    }
+    let body = format!("<html><body><ul>{}</ul></body></html>", entries.join(""));
+    Ok(Response::builder().body(body).unwrap())
+}
 
 #[tokio::main]
 async fn main() {
     let matches = App::new("serveit")
         .version("1.0")
         .about("Serves files from a specified directory with directory listing")
-        .arg(Arg::with_name("directory")
-            .short('d')
-            .long("directory")
-            .takes_value(true)
+        .arg(Arg::new("directory")
+            .index(1)
+            .required(true)
             .help("The path to the directory to serve"))
-        .arg(Arg::with_name("port")
+        .arg(Arg::new("port")
             .short('p')
             .long("port")
             .takes_value(true)
@@ -21,34 +41,19 @@ async fn main() {
             .help("Port to serve files on"))
         .get_matches();
 
-    let directory = matches.value_of("directory").unwrap_or(".");
-    let port = matches.value_of("port").unwrap().parse::<u16>().expect("Port must be a number");
+    let directory = matches.value_of("directory").unwrap(); // Safe due to .required(true)
+    let port: u16 = matches.value_of("port").unwrap().parse().expect("Port must be a number");
 
     let base_path = PathBuf::from(directory);
     println!("Serving files from: {:?}", base_path);
 
     let serve_dir = warp::path("files").and(warp::fs::dir(base_path.clone()));
-    let list_dir = warp::path("list").and_then(move || {
-        let base_path = base_path.clone();
-        async move {
-            let entries = std::fs::read_dir(base_path).map_err(|_| warp::reject::not_found())?;
-            let mut body = String::from("<html><body><ul>");
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    let display = path.display();
-                    body.push_str(&format!("<li><a href=\"/files/{}\">{}</a></li>", display, display));
-                }
-            }
-            body.push_str("</ul></body></html>");
-            Ok::<_, warp::Rejection>(Response::builder().body(body))
-        }
-    });
+
+    let list_dir_path = base_path.clone();
+    let list_dir = warp::path("list").and_then(move || list_directory(list_dir_path.clone()));
 
     let routes = serve_dir.or(list_dir);
 
-    warp::serve(routes)
-        .run(([127, 0, 0, 1], port))
-        .await;
+    warp::serve(routes).run(([0, 0, 0, 0], port)).await;
 }
 

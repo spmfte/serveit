@@ -19,7 +19,7 @@
 <h2 align="center">Getting Started</h2>
 <p align="center">
   Clone the repository and build with Cargo to get started:<br><br>
-  <code>git clone https://github.com/yourusername/serveit.git</code><br>
+  <code>git clone https://github.com/spmfte/serveit.git</code><br>
   <code>cd serveit</code><br>
   <code>cargo build --release</code><br>
 </p>

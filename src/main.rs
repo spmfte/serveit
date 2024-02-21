@@ -1,7 +1,9 @@
 use clap::{App, Arg};
 use serde::{Deserialize, Serialize};
-use std::{convert::Infallible, net::SocketAddr, path::PathBuf};
-use warp::{filters::BoxedFilter, http::Response, Filter, fs, Rejection, Reply};
+use std::net::SocketAddr;
+use std::path::PathBuf;
+use tokio::fs;
+use warp::{Filter, reject, Rejection, Reply};
 
 #[derive(Serialize, Deserialize)]
 struct DirEntry {
@@ -15,20 +17,16 @@ async fn main() {
     let matches = App::new("serveit")
         .version("1.0")
         .about("Serves files from a specified directory with directory listing and a React UI")
-        .arg(
-            Arg::with_name("directory")
-                .index(1)
-                .required(true)
-                .help("The path to the directory to serve"),
-        )
-        .arg(
-            Arg::with_name("port")
-                .short("p")
-                .long("port")
-                .takes_value(true)
-                .default_value("3030")
-                .help("Port to serve files on"),
-        )
+        .arg(Arg::with_name("directory")
+            .index(1)
+            .required(true)
+            .help("The path to the directory to serve"))
+        .arg(Arg::with_name("port")
+            .short("p")
+            .long("port")
+            .takes_value(true)
+            .default_value("3030")
+            .help("Port to serve files on"))
         .get_matches();
 
     let directory = matches.value_of("directory").unwrap();
@@ -47,16 +45,10 @@ async fn main() {
             let base_path = base_path.clone();
             async move {
                 let full_path = base_path.join(path);
-                list_directory(full_path).await.or_else(|_| {
-                    Ok(Response::builder()
-                        .status(404)
-                        .body("Directory not found".into())
-                        .unwrap())
-                })
+                list_directory(full_path).await
             }
         });
 
-    // Combine serving the directory listing, static files, and the React app
     let routes = serve_dir.or(list_dir).or(serve_web_ui);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -66,11 +58,12 @@ async fn main() {
 
 async fn list_directory(path: PathBuf) -> Result<impl Reply, Rejection> {
     let mut entries = Vec::new();
-    let read_dir = fs::read_dir(path).await.map_err(|_| warp::reject())?;
+    // Declare read_dir as mutable
+    let mut read_dir = fs::read_dir(path).await.map_err(|_| reject::not_found())?;
 
     while let Ok(Some(entry)) = read_dir.next_entry().await {
         let path = entry.path();
-        let metadata = entry.metadata().await.map_err(|_| warp::reject())?;
+        let metadata = entry.metadata().await.map_err(|_| reject::not_found())?;
         entries.push(DirEntry {
             name: entry.file_name().to_string_lossy().to_string(),
             path: path.to_string_lossy().to_string(),

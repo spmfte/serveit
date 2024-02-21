@@ -21,7 +21,7 @@ async fn main() {
             .required(true)
             .help("The path to the directory to serve"))
         .arg(Arg::with_name("port")
-            .short('p')
+            .short("p")
             .long("port")
             .takes_value(true)
             .default_value("3030")

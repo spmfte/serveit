@@ -2,7 +2,7 @@ use clap::{App, Arg};
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::fs;
-use warp::{http::Response, reject, Filter, Rejection, Reply};
+use warp::{Filter, Rejection, Reply, http::StatusCode, reject};
 
 #[derive(Serialize, Deserialize)]
 struct DirEntry {
@@ -80,16 +80,10 @@ async fn list_directory(path: PathBuf) -> Result<impl Reply, Rejection> {
 
 async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
     if err.is_not_found() {
-        Ok(warp::reply::with_status(
-            warp::reply::text("Not Found"),
-            warp::http::StatusCode::NOT_FOUND,
-        ))
+        Ok(warp::reply::with_status("Not Found", StatusCode::NOT_FOUND))
     } else {
         eprintln!("handle_rejection - unhandled error: {:?}", err);
-        Ok(warp::reply::with_status(
-            warp::reply::text("Internal Server Error"),
-            warp::http::StatusCode::INTERNAL_SERVER_ERROR,
-        ))
+        Ok(warp::reply::with_status("Internal Server Error", StatusCode::INTERNAL_SERVER_ERROR))
     }
 }
 

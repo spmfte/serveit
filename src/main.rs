@@ -2,7 +2,18 @@ use clap::{App, Arg};
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::fs;
-use warp::{http::StatusCode, Filter, Rejection, Reply, reject};
+// Consolidated warp imports
+use warp::{http::StatusCode, Filter, Rejection, Reply, reject, reply};
+
+// Consolidated handle_rejection function
+async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
+    if err.is_not_found() {
+        Ok(reply::with_status(reply::text("Not Found"), StatusCode::NOT_FOUND))
+    } else {
+        eprintln!("handle_rejection - unhandled error: {:?}", err);
+        Ok(reply::with_status(reply::text("Internal Server Error"), StatusCode::INTERNAL_SERVER_ERROR))
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 struct DirEntry {
@@ -78,11 +89,4 @@ async fn list_directory(path: PathBuf) -> Result<impl Reply, Rejection> {
     Ok(warp::reply::json(&entries))
 }
 
-async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
-    if err.is_not_found() {
-        Ok(warp::reply::with_status(warp::reply::text("Not Found"), StatusCode::NOT_FOUND))
-    } else {
-        eprintln!("handle_rejection - unhandled error: {:?}", err);
-        Ok(warp::reply::with_status(warp::reply::text("Internal Server Error"), StatusCode::INTERNAL_SERVER_ERROR))
-    }
-}
+

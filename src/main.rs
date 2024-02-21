@@ -2,7 +2,7 @@ use clap::{App, Arg};
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::fs;
-use warp::{Filter, Rejection, Reply, http::StatusCode, reject};
+use warp::{http::StatusCode, Filter, Rejection, Reply, reject};
 
 #[derive(Serialize, Deserialize)]
 struct DirEntry {
@@ -21,11 +21,12 @@ async fn main() {
             .required(true)
             .help("The path to the directory to serve"))
         .arg(Arg::new("port")
-            .short('p') // Use single quotes for char literals
+            .short('p') // Corrected: Use single quotes for char literals
             .long("port")
             .takes_value(true)
             .default_value("3030")
             .help("Port to serve files on"))
+        .get_matches(); // Corrected: Added missing `.get_matches()` and semicolon
 
     let directory = matches.value_of("directory").unwrap();
     let port: u16 = matches.value_of("port").unwrap().parse().expect("Port must be a number");
@@ -79,10 +80,9 @@ async fn list_directory(path: PathBuf) -> Result<impl Reply, Rejection> {
 
 async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
     if err.is_not_found() {
-        Ok(warp::reply::with_status("Not Found", StatusCode::NOT_FOUND))
+        Ok(warp::reply::with_status(warp::reply::text("Not Found"), StatusCode::NOT_FOUND))
     } else {
         eprintln!("handle_rejection - unhandled error: {:?}", err);
-        Ok(warp::reply::with_status("Internal Server Error", StatusCode::INTERNAL_SERVER_ERROR))
+        Ok(warp::reply::with_status(warp::reply::text("Internal Server Error"), StatusCode::INTERNAL_SERVER_ERROR))
     }
 }
-

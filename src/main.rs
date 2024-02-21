@@ -2,24 +2,22 @@ use clap::{App, Arg};
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::fs;
-// Consolidated warp imports
 use warp::{http::StatusCode, Filter, Rejection, Reply, reject, reply};
-
-// Consolidated handle_rejection function
-async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
-    if err.is_not_found() {
-        Ok(reply::with_status(reply::text("Not Found"), StatusCode::NOT_FOUND))
-    } else {
-        eprintln!("handle_rejection - unhandled error: {:?}", err);
-        Ok(reply::with_status(reply::text("Internal Server Error"), StatusCode::INTERNAL_SERVER_ERROR))
-    }
-}
 
 #[derive(Serialize, Deserialize)]
 struct DirEntry {
     name: String,
     path: String,
     is_dir: bool,
+}
+
+async fn handle_rejection(err: Rejection) -> Result<impl Reply, Rejection> {
+    if err.is_not_found() {
+        Ok(reply::with_status(reply::html("Not Found"), StatusCode::NOT_FOUND))
+    } else {
+        eprintln!("handle_rejection - unhandled error: {:?}", err);
+        Ok(reply::with_status(reply::html("Internal Server Error"), StatusCode::INTERNAL_SERVER_ERROR))
+    }
 }
 
 #[tokio::main]
@@ -32,12 +30,12 @@ async fn main() {
             .required(true)
             .help("The path to the directory to serve"))
         .arg(Arg::new("port")
-            .short('p') // Corrected: Use single quotes for char literals
+            .short('p')
             .long("port")
             .takes_value(true)
             .default_value("3030")
             .help("Port to serve files on"))
-        .get_matches(); // Corrected: Added missing `.get_matches()` and semicolon
+        .get_matches();
 
     let directory = matches.value_of("directory").unwrap();
     let port: u16 = matches.value_of("port").unwrap().parse().expect("Port must be a number");
@@ -86,7 +84,6 @@ async fn list_directory(path: PathBuf) -> Result<impl Reply, Rejection> {
             is_dir: metadata.is_dir(),
         });
     }
-    Ok(warp::reply::json(&entries))
+    Ok(reply::json(&entries))
 }
-
 

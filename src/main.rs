@@ -20,13 +20,12 @@ async fn main() {
             .index(1)
             .required(true)
             .help("The path to the directory to serve"))
-        .arg(Arg::with_name("port")
-            .short("p")
+        .arg(Arg::new("port")
+            .short('p') // Use single quotes for char literals
             .long("port")
             .takes_value(true)
             .default_value("3030")
             .help("Port to serve files on"))
-        .get_matches();
 
     let directory = matches.value_of("directory").unwrap();
     let port: u16 = matches.value_of("port").unwrap().parse().expect("Port must be a number");

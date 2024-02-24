@@ -5,18 +5,20 @@ import {
   List,
   ListItem,
   ListItemPrefix,
-  Alert,
-  Input,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
 } from "@material-tailwind/react";
 import {
-  FolderIcon, // For directories
-  DocumentTextIcon, // Default for files, you can add more based on file type if needed
+  FolderIcon,
+  DocumentTextIcon,
   PowerIcon,
 } from "@heroicons/react/24/solid";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
-export function SidebarWithSearch({ onFileSelect }) {
+export function SidebarWithSearch() {
   const [directoryStructure, setDirectoryStructure] = useState([]);
+  const [openAccordion, setOpenAccordion] = useState(null);
 
   useEffect(() => {
     async function fetchDirectoryStructure() {
@@ -29,52 +31,63 @@ export function SidebarWithSearch({ onFileSelect }) {
         setDirectoryStructure(data);
       } catch (error) {
         console.error("Could not fetch directory structure:", error);
-        // Optionally, set an error state here to display an error message in the UI
       }
     }
   
     fetchDirectoryStructure();
   }, []);
 
-  // Function to select an icon based on the directory entry
-  const selectIcon = (isDir) => {
-    return isDir ? FolderIcon : DocumentTextIcon;
+  const handleAccordionToggle = (path) => {
+    setOpenAccordion(openAccordion === path ? null : path);
   };
 
   return (
     <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
-      {/* Branding and Search */}
-      <div className="mb-2 flex items-center gap-4 p-4">
-        <img src="/logo512.png" alt="brand" className="h-8 w-8" />
-        <Typography variant="h5" color="blue-gray">
+      <div className="mb-2 p-4">
+        <img src="/logo512.png" alt="brand" className="h-10 w-10" />
+          <Typography variant="h5" color="blue-gray">
           Serve.it
         </Typography>
       </div>
-      <div className="p-2">
-        <Input icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search Files" />
-      </div>
-
-      {/* File Category List */}
       <List>
-      {directoryStructure.map((directory, index) => (
-  <ListItem key={index} onClick={() => onFileSelect(directory.path)} className="cursor-pointer p-2 hover:bg-blue-gray-50">
-    <ListItemPrefix>
-      {directory.is_dir ? <FolderIcon className="h-5 w-5" /> : <DocumentTextIcon className="h-5 w-5" />}
-    </ListItemPrefix>
-    {directory.name}
-  </ListItem>
-))}
+        {directoryStructure.map((entry) => (
+          entry.is_dir ? (
+            <Accordion key={entry.path} open={openAccordion === entry.path}>
+              <ListItem className="p-0">
+                <AccordionHeader onClick={() => handleAccordionToggle(entry.path)} className="border-b-0 p-3">
+                  <ListItemPrefix>
+                    <FolderIcon className="h-5 w-5" />
+                  </ListItemPrefix>
+                  <Typography color="blue-gray" className="mr-auto font-normal">
+                    {entry.name}
+                  </Typography>
+                  <ChevronDownIcon
+                    strokeWidth={2.5}
+                    className={`mx-auto h-4 w-4 transition-transform ${openAccordion === entry.path ? "rotate-180" : ""}`}
+                  />
+                </AccordionHeader>
+              </ListItem>
+              <AccordionBody className="py-1">
+                {/* Here you will need to fetch and list the contents of the directory */}
+              </AccordionBody>
+            </Accordion>
+          ) : (
+            <ListItem key={entry.path}>
+              <ListItemPrefix>
+                <DocumentTextIcon className="h-5 w-5" />
+              </ListItemPrefix>
+              {entry.name}
+            </ListItem>
+          )
+        ))}
       </List>
 
-      {/* System Actions */}
-      <List className="mt-4">
-        <ListItem className="cursor-pointer p-2 hover:bg-blue-gray-50">
-          <ListItemPrefix>
-            <PowerIcon className="h-5 w-5" />
-          </ListItemPrefix>
-          Log Out
-        </ListItem>
-      </List>
+      <ListItem className="cursor-pointer p-2 hover:bg-blue-gray-50">
+        <ListItemPrefix>
+          <PowerIcon className="h-5 w-5" />
+        </ListItemPrefix>
+        Log Out
+      </ListItem>
     </Card>
   );
 }

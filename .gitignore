@@ -1,16 +1,8 @@
-# General
+# General system files
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Icon must end with two \r
-Icon
-
-
-# Thumbnails
 ._*
-
-# Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
 .Spotlight-V100
@@ -18,12 +10,40 @@ Icon
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
+Icon    # Icon must end with two \r
+
+# Serveit specific
 serveit.pid
+
 # Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Build directories
 /target
+/build
 /images
+
+# Dependency directories
+/node_modules
+
+# Yarn & npm specifics
+.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Coverage reports
+/coverage
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.

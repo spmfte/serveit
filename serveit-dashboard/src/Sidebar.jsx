@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+
 import {
   Card,
   Typography,
@@ -29,10 +30,24 @@ export function SidebarWithSearch({ onFileSelect }) {
     setOpen(open === value ? 0 : value);
   };
 
-  const directoryStructure = [
-    { id: 1, name: 'Documents', icon: DocumentTextIcon },
+  const [directoryStructure, setDirectoryStructure] = useState([]);
 
-  ];
+  useEffect(() => {
+    async function fetchDirectoryStructure() {
+      try {
+        const response = await fetch('/list/');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setDirectoryStructure(data);
+      } catch (error) {
+        console.error("Could not fetch directory structure", error);
+      }
+    }
+
+    fetchDirectoryStructure();
+  }, []);
 
   return (
     <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">

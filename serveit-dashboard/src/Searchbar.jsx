@@ -1,56 +1,93 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import {
+  Card,
+  Typography,
+  List,
+  ListItem,
+  ListItemPrefix,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
+} from "@material-tailwind/react";
+import {
+  FolderIcon,
+  DocumentTextIcon,
+  PowerIcon,
+} from "@heroicons/react/24/solid";
+import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
-// Utility function to debounce rapid invocations of a function
-const debounce = (func, wait) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
+export function SidebarWithSearch() {
+  const [directoryStructure, setDirectoryStructure] = useState([]);
+  const [openAccordion, setOpenAccordion] = useState(null);
 
-// SearchBar component
-const SearchBar = ({ placeholder, onSearch }) => {
-  // State for the search input value
-  const [inputValue, setInputValue] = useState('');
-
-  // Debounced version of the search handler
-  const debouncedSearch = debounce(onSearch, 300);
-
-  // Effect that triggers the debounced search whenever the input value changes
   useEffect(() => {
-    if (inputValue) {
-      debouncedSearch(inputValue);
+    async function fetchDirectoryStructure() {
+      try {
+        const response = await fetch('/list/');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setDirectoryStructure(data);
+      } catch (error) {
+        console.error("Could not fetch directory structure:", error);
+      }
     }
-  }, [inputValue]);
+  
+    fetchDirectoryStructure();
+  }, []);
+
+  const handleAccordionToggle = (path) => {
+    setOpenAccordion(openAccordion === path ? null : path);
+  };
 
   return (
-    <div className="flex items-center max-w-xl mx-auto py-2 px-4">
-      <div className="flex border-2 rounded overflow-hidden w-full shadow-sm">
-        <span className="text-gray-500 flex items-center justify-center px-3">
-          {/* Icon from Heroicons (https://heroicons.dev/) */}
-          🔍
-        </span>
-        <input
-          type="text"
-          placeholder={placeholder}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          className="w-full px-4 py-2 leading-tight text-gray-700 bg-white border-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
+      <div className="mb-2 p-4">
+        <img src="/logo512.png" alt="brand" className="h-10 w-10" />
+          <Typography variant="h5" color="blue-gray">
+          Serve.it
+        </Typography>
       </div>
-    </div>
+      <List>
+        {directoryStructure.map((entry) => (
+          entry.is_dir ? (
+            <Accordion key={entry.path} open={openAccordion === entry.path}>
+              <ListItem className="p-0">
+                <AccordionHeader onClick={() => handleAccordionToggle(entry.path)} className="border-b-0 p-3">
+                  <ListItemPrefix>
+                    <FolderIcon className="h-5 w-5" />
+                  </ListItemPrefix>
+                  <Typography color="blue-gray" className="mr-auto font-normal">
+                    {entry.name}
+                  </Typography>
+                  <ChevronDownIcon
+                    strokeWidth={2.5}
+                    className={`mx-auto h-4 w-4 transition-transform ${openAccordion === entry.path ? "rotate-180" : ""}`}
+                  />
+                </AccordionHeader>
+              </ListItem>
+              <AccordionBody className="py-1">
+                {/* Here you will need to fetch and list the contents of the directory */}
+              </AccordionBody>
+            </Accordion>
+          ) : (
+            <ListItem key={entry.path}>
+              <ListItemPrefix>
+                <DocumentTextIcon className="h-5 w-5" />
+              </ListItemPrefix>
+              {entry.name}
+            </ListItem>
+          )
+        ))}
+      </List>
+
+      <ListItem className="cursor-pointer p-2 hover:bg-blue-gray-50">
+        <ListItemPrefix>
+          <PowerIcon className="h-5 w-5" />
+        </ListItemPrefix>
+        Log Out
+      </ListItem>
+    </Card>
   );
-};
-
-SearchBar.propTypes = {
-  placeholder: PropTypes.string,
-  onSearch: PropTypes.func.isRequired,
-};
-
-export default SearchBar;
+}

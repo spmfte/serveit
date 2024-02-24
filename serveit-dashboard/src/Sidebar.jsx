@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import {
   Card,
   Typography,
@@ -10,26 +9,13 @@ import {
   Input,
 } from "@material-tailwind/react";
 import {
-  FolderIcon,
-  DocumentTextIcon,
-  VideoCameraIcon,
-  ArrowTrendingUpIcon,
+  FolderIcon, // For directories
+  DocumentTextIcon, // Default for files, you can add more based on file type if needed
   PowerIcon,
 } from "@heroicons/react/24/solid";
-import {
-  ChevronRightIcon,
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export function SidebarWithSearch({ onFileSelect }) {
-  const [open, setOpen] = React.useState(0);
-  const [openAlert, setOpenAlert] = React.useState(true);
-
-  const handleOpen = (value) => {
-    setOpen(open === value ? 0 : value);
-  };
-
   const [directoryStructure, setDirectoryStructure] = useState([]);
 
   useEffect(() => {
@@ -37,17 +23,23 @@ export function SidebarWithSearch({ onFileSelect }) {
       try {
         const response = await fetch('/list/');
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
         setDirectoryStructure(data);
       } catch (error) {
-        console.error("Could not fetch directory structure", error);
+        console.error("Could not fetch directory structure:", error);
+        // Optionally, set an error state here to display an error message in the UI
       }
     }
-
+  
     fetchDirectoryStructure();
   }, []);
+
+  // Function to select an icon based on the directory entry
+  const selectIcon = (isDir) => {
+    return isDir ? FolderIcon : DocumentTextIcon;
+  };
 
   return (
     <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
@@ -64,14 +56,14 @@ export function SidebarWithSearch({ onFileSelect }) {
 
       {/* File Category List */}
       <List>
-        {directoryStructure.map((directory) => (
-          <ListItem key={directory.id} onClick={() => onFileSelect(directory.name)} className="cursor-pointer p-2 hover:bg-blue-gray-50">
-            <ListItemPrefix>
-              <directory.icon className="h-5 w-5" />
-            </ListItemPrefix>
-            {directory.name}
-          </ListItem>
-        ))}
+      {directoryStructure.map((directory, index) => (
+  <ListItem key={index} onClick={() => onFileSelect(directory.path)} className="cursor-pointer p-2 hover:bg-blue-gray-50">
+    <ListItemPrefix>
+      {directory.is_dir ? <FolderIcon className="h-5 w-5" /> : <DocumentTextIcon className="h-5 w-5" />}
+    </ListItemPrefix>
+    {directory.name}
+  </ListItem>
+))}
       </List>
 
       {/* System Actions */}

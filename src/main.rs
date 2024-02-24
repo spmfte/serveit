@@ -41,7 +41,7 @@ async fn main() {
     let port: u16 = matches.value_of("port").unwrap().parse().expect("Port must be a number");
 
     let base_path = PathBuf::from(directory).canonicalize().unwrap();
-    let webui_path = base_path.join("webui/build");
+    let webui_path = base_path.join("serveit-dashboard/build");
     println!("Serving files from: {:?}", base_path);
     println!("Serving web UI from: {:?}", webui_path);
 

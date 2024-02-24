@@ -1,4 +1,6 @@
 <h1 align="center">ServeIt: Rust File Server</h1>
+<h2 align="center">
+  ![ServeIt](./serveitlogo2.png) 
 <h3 align="center">Effortlessly serve files from the command line with Rust</h3>
 
 <div align="center">

@@ -1,22 +1,17 @@
 // src/services/fileService.js
-
-/**
- * Fetches the content of a file.
- * @param {string} filePath The path to the file.
- * @returns {Promise<string>} The content of the file.
- */
 export const fetchFileContent = async (filePath) => {
     try {
-      const response = await fetch(`/api/files/content/${encodeURIComponent(filePath)}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return await response.text(); // Adjust according to the expected content type
+        const response = await fetch(`/content/${filePath}`); // Adjust endpoint as needed
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const content = await response.text();
+        return content;
     } catch (error) {
-      console.error("Could not fetch file content:", error);
-      throw error; // Re-throw to handle it in the component
+        console.error("Could not fetch file content:", error);
     }
-  };
+};
+
   
   /**
    * Saves the updated content of a file.

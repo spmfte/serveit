@@ -1,34 +1,45 @@
-// FileEditor.jsx
+// src/components/FileEditor.jsx
 import React, { useState, useEffect } from 'react';
+import { fetchFileContent, saveFileContent } from '../services/fileService'; // Adjust the path as necessary
 
-const FileEditor = ({ filePath, fetchFileContent, saveFileContent }) => {
+const FileEditor = ({ filePath }) => {
   const [content, setContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const loadContent = async () => {
-      const fileContent = await fetchFileContent(filePath);
-      setContent(fileContent);
-    };
-
-    if (filePath) {
-      loadContent();
-    }
-  }, [filePath, fetchFileContent]);
+    if (!filePath) return;
+    
+    // Fetch file content when `filePath` changes
+    fetchFileContent(filePath)
+      .then(setContent)
+      .catch(error => console.error(`Failed to fetch content for ${filePath}:`, error));
+  }, [filePath]);
 
   const handleSave = async () => {
-    await saveFileContent(filePath, content);
-    alert('Content saved!');
+    setIsSaving(true);
+    try {
+      await saveFileContent(filePath, content);
+      alert('File saved successfully.');
+    } catch (error) {
+      console.error(`Failed to save content for ${filePath}:`, error);
+      alert('Failed to save file.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div>
+      <h2>Editing: {filePath}</h2>
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        rows="10"
-        cols="50"
-      />
-      <button onClick={handleSave}>Save</button>
+        rows="20"
+        cols="80"
+        disabled={isSaving}
+      ></textarea>
+      <br />
+      <button onClick={handleSave} disabled={isSaving}>Save</button>
     </div>
   );
 };

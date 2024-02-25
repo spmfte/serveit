@@ -16,7 +16,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
-export function SidebarWithSearch() {
+export function SidebarWithSearch({ onFileSelect }) {
   const [directoryStructure, setDirectoryStructure] = useState([]);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [directoryContents, setDirectoryContents] = useState({});
@@ -32,15 +32,12 @@ export function SidebarWithSearch() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      setDirectoryStructure(data);
       if (path) {
-        // Update the contents for a specific directory path
         setDirectoryContents((prevContents) => ({
           ...prevContents,
           [path]: data,
         }));
       } else {
-        // Set the root directory structure
         setDirectoryStructure(data);
       }
     } catch (error) {
@@ -51,7 +48,6 @@ export function SidebarWithSearch() {
   const handleAccordionToggle = (path) => {
     const isOpen = openAccordion === path;
     setOpenAccordion(isOpen ? null : path);
-    // Fetch the directory contents if the accordion is being opened and contents are not already fetched
     if (!isOpen && !directoryContents[path]) {
       fetchDirectoryStructure(path);
     }
@@ -85,9 +81,10 @@ export function SidebarWithSearch() {
     );
   };
 
+  // Correct renderFileItem definition with onClick handler
   const renderFileItem = (entry) => {
     return (
-      <ListItem key={entry.path}>
+      <ListItem key={entry.path} className="cursor-pointer" onClick={() => onFileSelect(entry.path)}>
         <ListItemPrefix>
           <DocumentTextIcon className="h-5 w-5" />
         </ListItemPrefix>
@@ -111,7 +108,9 @@ export function SidebarWithSearch() {
       </List>
       <ListItem className="cursor-pointer p-2 hover:bg-blue-gray-50">
         <ListItemPrefix>
-          <PowerIcon className="h-5 w-5" />
+          <
+
+PowerIcon className="h-5 w-5" />
         </ListItemPrefix>
         Log Out
       </ListItem>

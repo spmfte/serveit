@@ -24,26 +24,3 @@ Temporary Items
 
 # Build directories
 /target
-/build
-/images
-
-# Dependency directories
-/node_modules
-
-# Yarn & npm specifics
-.pnp
-.pnp.js
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Coverage reports
-/coverage
-
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.

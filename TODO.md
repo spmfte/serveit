@@ -1,3 +1,3 @@
 # Things to add/fix
 
-[ ] - add read amd write
+[ ] - add read and write

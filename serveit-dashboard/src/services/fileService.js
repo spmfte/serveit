@@ -8,7 +8,7 @@
 export const fetchFileContent = async (filePath) => {
     try {
         // Ensure filePath is correctly encoded to be included in the URL
-        const response = await fetch(`/api/files/content?path=${encodeURIComponent(filePath)}`);
+        const response = await fetch(`/files/content?path=${encodeURIComponent(filePath)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -27,6 +27,7 @@ export const fetchFileContent = async (filePath) => {
  */
 export const saveFileContent = async (filePath, content) => {
     try {
+        // Use PUT method to update the file content, specifying the content type and the body as JSON
         const response = await fetch(`/api/files/content`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -37,7 +38,6 @@ export const saveFileContent = async (filePath, content) => {
         }
     } catch (error) {
         console.error("Could not save file content:", error);
-        throw error; // Re-throw to handle it in the component
+        throw error; // Re-throw the error to handle it in the UI component
     }
 };
-

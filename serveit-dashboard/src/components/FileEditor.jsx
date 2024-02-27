@@ -1,6 +1,8 @@
+
+// FileEditor.jsx
 import React, { useState, useEffect } from 'react';
 import { Card } from "@material-tailwind/react";
-import Markdown from 'markdown-to-jsx'; // Assuming you've added markdown-to-jsx to your dependencies
+import Markdown from 'markdown-to-jsx';
 
 const FileEditor = ({ filePath, fetchFileContent, saveFileContent }) => {
     const [content, setContent] = useState('');
@@ -10,12 +12,11 @@ const FileEditor = ({ filePath, fetchFileContent, saveFileContent }) => {
         const loadContent = async () => {
             const fileContent = await fetchFileContent(filePath);
             setContent(fileContent);
-            setFileType(determineFileType(filePath)); // Determine file type based on extension
+            setFileType(determineFileType(filePath));
         };
         loadContent();
     }, [filePath, fetchFileContent]);
 
-    // Determine file type based on the file extension
     const determineFileType = (path) => {
         const extension = path.split('.').pop();
         switch (extension) {
@@ -26,13 +27,11 @@ const FileEditor = ({ filePath, fetchFileContent, saveFileContent }) => {
                 return 'image';
             case 'md':
                 return 'markdown';
-            // Add more cases as necessary
             default:
                 return 'text';
         }
     };
 
-    // Render content based on file type
     const renderContent = () => {
         switch (fileType) {
             case 'image':
@@ -67,3 +66,4 @@ const FileEditor = ({ filePath, fetchFileContent, saveFileContent }) => {
 };
 
 export default FileEditor;
+

@@ -83,15 +83,15 @@ export function SidebarWithSearch({ onFileSelect }) {
 
   // Correct renderFileItem definition with onClick handler
   const renderFileItem = (entry) => {
-    return (
-      <ListItem key={entry.path} className="cursor-pointer" onClick={() => onFileSelect(entry.path)}>
-        <ListItemPrefix>
-          <DocumentTextIcon className="h-5 w-5" />
-        </ListItemPrefix>
-        {entry.name}
-      </ListItem>
-    );
-  };
+  return (
+    <ListItem key={entry.path} className="cursor-pointer" onClick={() => onFileSelect(entry)}>
+      <ListItemPrefix>
+        <DocumentTextIcon className="h-5 w-5" />
+      </ListItemPrefix>
+      {entry.name}
+    </ListItem>
+  );
+};
 
   return (
     <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
